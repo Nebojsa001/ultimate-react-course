@@ -1,34 +1,37 @@
 import { useState } from "react";
 import "./App.css";
 
-function App() {
-  const [step, setStep] = useState(1);
+export default function App() {
+  return (
+    <div className="App">
+      <Counter />
+    </div>
+  );
+}
+
+function Counter() {
+  const [step, setStep] = useState(0);
   const [count, setCount] = useState(1);
 
   const days = step * count;
   const today = new Date();
   today.setDate(today.getDate() + count * step);
 
-  const handleStepClick = (operation) => {
-    operation === "increase"
-      ? setStep((prev) => prev + 1)
-      : setStep((prev) => prev - 1);
+  const handleStepClick = (value) => {
+    setStep(value);
   };
 
-  const handleCountClick = (operation) => {
+  const handleCountClick = (operation, value) => {
     operation === "increase"
       ? setCount((prev) => prev + 1)
-      : setCount((prev) => prev - 1);
+      : operation === "decrease"
+      ? setCount((prev) => prev - 1)
+      : setCount(value);
   };
   return (
     <div className="main-app">
-      <h1>Hellow wlcm to date counter</h1>
-      <ChangeDate type="Step" step={step} handleOperation={handleStepClick} />
-      <ChangeDate
-        type="Count"
-        step={count}
-        handleOperation={handleCountClick}
-      />
+      <ChangeStep handleOperation={handleStepClick} step={step} />
+      <ChangeCount handleOperation={handleCountClick} count={count} />
       <p>
         {/* {days === 0 && `Today is ${today.toDateString()}`}  //my-way
         {days < 0 && `${days * -1} days ago was ${today.toDateString()}`}
@@ -55,16 +58,31 @@ function UpdateDateBtn({ operation, handleOperation }) {
   );
 }
 
-function ChangeDate({ type, step, handleOperation }) {
+function ChangeStep({ handleOperation, step }) {
   return (
     <div>
-      <UpdateDateBtn operation="decrease" handleOperation={handleOperation} />
-      <span>
-        {type} {step}:
-      </span>
-      <UpdateDateBtn operation="increase" handleOperation={handleOperation} />
+      <input
+        type="range"
+        min="0"
+        max="10"
+        value={step}
+        onChange={(e) => handleOperation(e.target.value)}
+      ></input>
+      <span>{step}</span>
     </div>
   );
 }
 
-export default App;
+function ChangeCount({ handleOperation, count }) {
+  return (
+    <div>
+      <UpdateDateBtn operation="decrease" handleOperation={handleOperation} />
+      <input
+        type="text"
+        value={count}
+        onChange={(e) => handleOperation("", e.target.value)}
+      ></input>
+      <UpdateDateBtn operation="increase" handleOperation={handleOperation} />
+    </div>
+  );
+}
