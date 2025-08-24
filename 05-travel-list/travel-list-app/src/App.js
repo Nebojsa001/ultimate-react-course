@@ -1,18 +1,32 @@
 import { useState } from "react";
-const initialItems = [
-  { id: 1, description: "Fishing rod", quantity: 2, packed: false },
-  { id: 2, description: "Hooks", quantity: 12, packed: false },
-  { id: 3, description: "Fishing line", quantity: 7, packed: true },
-  { id: 4, description: "Jig lures", quantity: 4, packed: true },
-  { id: 5, description: "Assist hooks", quantity: 4, packed: false },
-];
 export default function App() {
-  const [initialItemsState, setInitialItemsState] = useState(initialItems);
+  const [items, setItems] = useState([]);
+
+  function handleAddItems(item) {
+    setItems((items) => [...items, item]);
+  }
+
+  function handleDeleteItems(itemId) {
+    setItems((items) => items.filter((item) => item.id !== itemId));
+  }
+
+  function handleToggleItem(itemId) {
+    setItems((items) =>
+      items.map((item) =>
+        item.id === itemId ? { ...item, packed: !item.packed } : item
+      )
+    );
+  }
+
   return (
     <div className="app">
       <Logo />
-      <Form />
-      <PackingList />
+      <Form onAddItems={handleAddItems} />
+      <PackingList
+        items={items}
+        onDeleteItems={handleDeleteItems}
+        onToggleItems={handleToggleItem}
+      />
       <Stats />
     </div>
   );
@@ -26,19 +40,20 @@ function Logo() {
   );
 }
 
-function Form({ initialItemss }) {
+function Form({ onAddItems }) {
   const [description, setDescription] = useState("");
   const [quantity, setQuantity] = useState(1);
+
   function handleSumbit(e) {
     e.preventDefault();
     if (!description) return;
+
     const newItem = { description, quantity, packed: false, id: Date.now() };
-    console.log(newItem);
+    onAddItems(newItem);
 
     //set default after submit
     setDescription("");
     setQuantity(1);
-    console.log(initialItemss);
   }
 
   return (
@@ -64,26 +79,38 @@ function Form({ initialItemss }) {
     </form>
   );
 }
-function PackingList() {
+function PackingList({ items, onDeleteItems, onToggleItems }) {
   return (
     <div className="list">
       <ul>
-        {initialItems.map((item) => (
-          <Item item={item} key={item.id} />
+        {items.map((item) => (
+          <Item
+            item={item}
+            key={item.id}
+            onDeleteItems={onDeleteItems}
+            onToggleItems={onToggleItems}
+          />
         ))}
       </ul>
     </div>
   );
 }
 
-function Item({ item }) {
+function Item({ item, onDeleteItems, onToggleItems }) {
   return (
     <li>
+      <input
+        type="checkbox"
+        value={item.packed}
+        onChange={() => {
+          onToggleItems(item.id);
+        }}
+      />
       <span>{item.quantity}</span>
       <span style={item.packed ? { textDecoration: "line-through" } : {}}>
         {item.description}
       </span>
-      <button>❌</button>
+      <button onClick={() => onDeleteItems(item.id)}>❌</button>
     </li>
   );
 }
